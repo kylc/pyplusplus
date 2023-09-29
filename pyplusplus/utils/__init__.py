@@ -7,6 +7,7 @@
 This module is a collection of unrelated algorithms, that works on code creators
 tree.
 """
+import re
 import os
 import math
 from pygccxml import declarations
@@ -62,6 +63,11 @@ class exposed_decls_db_t( object ):
         UNEXPOSED_DECL_SIGN = '~'
         CALLDEF_SIGNATURE_DELIMITER = '#'
 
+        # This pattern will split on @ symbols _only_ outside of quoted strings,
+        # correctly avoiding a split in the middle of a quoted path.
+        # (from https://stackoverflow.com/q/30933216/152147)
+        FIELD_PATTERN = re.compile( r'''((?:[^@"']|"[^"]*"|'[^']*')+)''' )
+
         def __init__( self, decl_or_string ):
             self.key = ''
             self.signature = ''
@@ -85,15 +91,14 @@ class exposed_decls_db_t( object ):
         def __init_from_str( self, row ):
             try:
                 self.exposed_sign, self.key, self.normalized_name, self.signature \
-                    = row.split( self.FIELD_DELIMITER )
+                    = self.FIELD_PATTERN.findall( row )
             except ValueError:
+                print("ERROR ERROR ERROR", row)
                 splits = row.split( self.FIELD_DELIMITER )
                 self.exposed_sign = splits[0]
                 self.key = splits[1]
                 self.signature = splits[-1]
                 self.normalized_name = self.FIELD_DELIMITER.join(splits[2:-1])
-
-
 
         def update_key( self, cls ):
             self.key = cls.__name__

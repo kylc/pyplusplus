@@ -373,7 +373,7 @@ class multiple_files_t(writer.writer_t):
         """
         free_functions = ( code_creators.free_function_t, code_creators.free_fun_overloads_t )
         creators = [x for x in self.extmodule.body.creators if isinstance(x, free_functions )]
-        self.split_creators( creators, '_free_functions', 'register_free_functions', -1 )
+        self.split_creators( creators, '_free_functions', self.extmodule.body.name + '_register_free_functions', -1 )
 
     def write(self):
         """
@@ -395,8 +395,8 @@ class multiple_files_t(writer.writer_t):
         self.split_values_traits()
         self.split_classes()
         self.split_enums()
-        self.split_global_variables()
         self.split_free_functions()
+        self.split_global_variables()
 
         if self.write_main:
             self.include_creators.sort( key=lambda ic: ic.header )
